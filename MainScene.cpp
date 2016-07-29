@@ -1,4 +1,5 @@
 #include "MainScene.h"
+#include "ScaleManager.h"
 #include "State.h"
 #include <vector>
 #include <string>
@@ -27,13 +28,23 @@ bool MainScene::init()
 	if (!Layer::init()) {
 		return false;
 	}
-	
 
 	Device::setAccelerometerEnabled(true);
 	Device::setKeepScreenOn(true);
 
 	auto accListener = EventListenerAcceleration::create(CC_CALLBACK_2(MainScene::OnAcceleration, this));
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(accListener, this);
+
+	// Back button handler
+	auto touchListener = EventListenerKeyboard::create();
+	touchListener->onKeyReleased = [](cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
+	{
+		if (keyCode == EventKeyboard::KeyCode::KEY_BACK)
+		{
+			Director::getInstance()->end();
+		}
+	};
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 
@@ -105,20 +116,23 @@ bool MainScene::init()
 	circleBody->setGravityEnable(false);
 	ball->setPhysicsBody(circleBody);
 	addChild(ball);
+	SCALEBYRADIUS(ball);
 
 	this->schedule(schedule_selector(MainScene::handleApp), 0.05f);
 	this->schedule(schedule_selector(MainScene::handleStates), HANDLESECONDS);
 
 	// Creating the interaction text with the user
 	counter = 0;
-	interactText = Label::createWithSystemFont("", "Ariel", 30);
+	interactText = Label::createWithSystemFont("", "Ariel", 36);
 	addChild(interactText);
 	interactText->setPosition(choiseWidth, choiseHeight / 2);
+	SCALENODE(interactText);
 
-	helperText = Label::createWithSystemFont("", "Ariel", 18);
+	helperText = Label::createWithSystemFont("", "Ariel", 20);
 	addChild(helperText);
-	helperText->setPosition(visibleSize.width - 15, 30);
-	helperText->setAnchorPoint(Vec2(1, 1));
+	helperText->setPosition(visibleSize.width - 15, 10);
+	helperText->setAnchorPoint(Vec2(1, 0));
+	SCALENODE(helperText);
 
 	return true;
 }
@@ -126,7 +140,7 @@ bool MainScene::init()
 void MainScene::OnAcceleration(cocos2d::Acceleration *_acc, cocos2d::Event *_event) 
 {
 	// If the current state of the app is not tilt do not geather info
-	if (State::get().getState() != StatesInfo::Tilt)
+	if (State::get()->getState() != StatesInfo::Tilt)
 	{
 		return;
 	}
@@ -143,7 +157,7 @@ void MainScene::OnAcceleration(cocos2d::Acceleration *_acc, cocos2d::Event *_eve
 
 void MainScene::interactScreen(cocos2d::Touch *touch, cocos2d::Event *event)
 {	
-	auto _state = State::get().getState();
+	auto _state = State::get()->getState();
 
 	if (_state == StatesInfo::Start || 
 		_state == StatesInfo::Question || 
@@ -155,14 +169,14 @@ void MainScene::interactScreen(cocos2d::Touch *touch, cocos2d::Event *event)
 
 void MainScene::handleStates(float dt) 
 {
-	auto _state = State::get().getState();
+	auto _state = State::get()->getState();
 
 	switch (_state)
 	{
 	case StatesInfo::Begin:
 	{
 		updateText("Welcome to the Choices app", "Tap on screen");
-		State::get().setState(StatesInfo::Start);
+		State::get()->setState(StatesInfo::Start);
 	}break;
 	case StatesInfo::Start:
 	{
@@ -171,7 +185,7 @@ void MainScene::handleStates(float dt)
 		{
 			updateText("Think about some question \nyou wish to get answer...", "Tap on screen and start to tilt the device");
 			screenInteract = false;
-			State::get().setState(StatesInfo::Question);
+			State::get()->setState(StatesInfo::Question);
 		}
 	}break;
 	case StatesInfo::Question:
@@ -181,7 +195,7 @@ void MainScene::handleStates(float dt)
 			// Setting counter for tilting
 			counter = TILTSECONDS / HANDLESECONDS;
 			screenInteract = false;
-			State::get().setState(StatesInfo::Tilt);
+			State::get()->setState(StatesInfo::Tilt);
 		}
 	}break;
 	case StatesInfo::Tilt:
@@ -194,7 +208,7 @@ void MainScene::handleStates(float dt)
 		//circleBody->applyImpulse(Vec2(2000, 3000));
 		if (counter < 0)
 		{
-			State::get().setState(StatesInfo::Wait);
+			State::get()->setState(StatesInfo::Wait);
 			updateText("Wait until the ball stops", "");
 		}
 	}break;
@@ -203,7 +217,7 @@ void MainScene::handleStates(float dt)
 		auto velocity = abs(circleBody->getAngularVelocity());
 		if (velocity < 1.5f)
 		{
-			State::get().setState(StatesInfo::Answer);
+			State::get()->setState(StatesInfo::Answer);
 		}
 	}break;
 	case StatesInfo::Answer: 
@@ -212,7 +226,7 @@ void MainScene::handleStates(float dt)
 			DelayTime::create(1.0f),
 			CallFunc::create([&]()
 		{
-			State::get().setState(StatesInfo::Finish);
+			State::get()->setState(StatesInfo::Finish);
 			updateText(getAnswer(chosenindx), "Tap to ask another question");
 		}),
 			nullptr));
@@ -221,7 +235,7 @@ void MainScene::handleStates(float dt)
 	{
 		if (screenInteract)
 		{
-			State::get().setState(StatesInfo::Start);
+			State::get()->setState(StatesInfo::Start);
 		}
 	}break;
 	default:
@@ -231,7 +245,7 @@ void MainScene::handleStates(float dt)
 
 void MainScene::handleApp(float dt)
 {
-	auto _state = State::get().getState();
+	auto _state = State::get()->getState();
 
 	if (_state == StatesInfo::Tilt)
 	{

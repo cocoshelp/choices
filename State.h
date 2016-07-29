@@ -4,10 +4,10 @@
 class State
 {
 public:
-	static State& get()
+	static State* get()
 	{
 		static State instance;
-		return instance;
+		return &instance;
 	}
 
 	StatesInfo getState();
@@ -17,5 +17,4 @@ private:
 	StatesInfo _stateInfo;
 	State() { _stateInfo = StatesInfo::Begin; }
 	State(State const&);
-	void operator=(State const&);
 };
