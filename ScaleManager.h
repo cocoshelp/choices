@@ -7,7 +7,7 @@ USING_NS_CC;
 class ScaleManager
 {
 public:
-	static ScaleManager* Instance()
+	static ScaleManager* getInstance()
 	{
 		static ScaleManager instance;
 		return &instance;
@@ -25,9 +25,9 @@ private:
 	float _scalFactor;
 };
 
-#define GETSCALEX ( ScaleManager::Instance()->getScaleX() )
-#define GETSCALEY ( ScaleManager::Instance()->getScaleY() )
-#define GETSCALEFAC ( ScaleManager::Instance()->getScaleFactor() )
+#define GETSCALEX ( ScaleManager::getInstance()->getScaleX() )
+#define GETSCALEY ( ScaleManager::getInstance()->getScaleY() )
+#define GETSCALEFAC ( ScaleManager::getInstance()->getScaleFactor() )
 
 #define SCALEX(p) ( (p) * GETSCALEX )
 #define SCALEY(p) ( (p) * GETSCALEY )

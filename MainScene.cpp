@@ -51,17 +51,17 @@ bool MainScene::init()
 	auto choiseWidth = visibleSize.width / 2;
 	auto choiseHeight = visibleSize.height / 4;
 
-	startButton = LayerColor::create(Color4B(197, 31, 36, 255), visibleSize.width, choiseHeight);
-	startButton->setAnchorPoint(Vec2(0,0));
-	startButton->setPosition(0, 0);
-	addChild(startButton);
+	interactionLayer = LayerColor::create(Color4B(197, 31, 36, 255), visibleSize.width, choiseHeight);
+	interactionLayer->setAnchorPoint(Vec2(0,0));
+	interactionLayer->setPosition(0, 0);
+	addChild(interactionLayer);
 
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->setSwallowTouches(true);
 	listener->onTouchBegan = [](Touch* touch, Event* event) { return true; };
 	listener->onTouchMoved = [](Touch* touch, Event* event) {};
 	listener->onTouchEnded = CC_CALLBACK_2(MainScene::interactScreen, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, startButton);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, interactionLayer);
 
 	auto blue = LayerColor::create(Color4B(0, 63, 106, 255), choiseWidth, choiseHeight);
 	blue->setAnchorPoint(Vec2(0, 0));
@@ -140,7 +140,7 @@ bool MainScene::init()
 void MainScene::OnAcceleration(cocos2d::Acceleration *_acc, cocos2d::Event *_event) 
 {
 	// If the current state of the app is not tilt do not geather info
-	if (State::get()->getState() != StatesInfo::Tilt)
+	if (State::getInstance()->getState() != StatesInfo::Tilt)
 	{
 		return;
 	}
@@ -151,13 +151,12 @@ void MainScene::OnAcceleration(cocos2d::Acceleration *_acc, cocos2d::Event *_eve
 	if (accPrev == Vec2())
 	{
 		accPrev = acc;
-		handStartAcc == acc;
 	}
 }
 
 void MainScene::interactScreen(cocos2d::Touch *touch, cocos2d::Event *event)
 {	
-	auto _state = State::get()->getState();
+	auto _state = State::getInstance()->getState();
 
 	if (_state == StatesInfo::Start || 
 		_state == StatesInfo::Question || 
@@ -169,14 +168,14 @@ void MainScene::interactScreen(cocos2d::Touch *touch, cocos2d::Event *event)
 
 void MainScene::handleStates(float dt) 
 {
-	auto _state = State::get()->getState();
+	auto _state = State::getInstance()->getState();
 
 	switch (_state)
 	{
 	case StatesInfo::Begin:
 	{
 		updateText("Welcome to the Choices app", "Tap on screen");
-		State::get()->setState(StatesInfo::Start);
+		State::getInstance()->setState(StatesInfo::Start);
 	}break;
 	case StatesInfo::Start:
 	{
@@ -185,7 +184,7 @@ void MainScene::handleStates(float dt)
 		{
 			updateText("Think about some question \nyou wish to get answer...", "Tap on screen and start to tilt the device");
 			screenInteract = false;
-			State::get()->setState(StatesInfo::Question);
+			State::getInstance()->setState(StatesInfo::Question);
 		}
 	}break;
 	case StatesInfo::Question:
@@ -195,7 +194,7 @@ void MainScene::handleStates(float dt)
 			// Setting counter for tilting
 			counter = TILTSECONDS / HANDLESECONDS;
 			screenInteract = false;
-			State::get()->setState(StatesInfo::Tilt);
+			State::getInstance()->setState(StatesInfo::Tilt);
 		}
 	}break;
 	case StatesInfo::Tilt:
@@ -208,7 +207,7 @@ void MainScene::handleStates(float dt)
 		//circleBody->applyImpulse(Vec2(2000, 3000));
 		if (counter < 0)
 		{
-			State::get()->setState(StatesInfo::Wait);
+			State::getInstance()->setState(StatesInfo::Wait);
 			updateText("Wait until the ball stops", "");
 		}
 	}break;
@@ -217,7 +216,7 @@ void MainScene::handleStates(float dt)
 		auto velocity = abs(circleBody->getAngularVelocity());
 		if (velocity < 1.5f)
 		{
-			State::get()->setState(StatesInfo::Answer);
+			State::getInstance()->setState(StatesInfo::Answer);
 		}
 	}break;
 	case StatesInfo::Answer: 
@@ -226,7 +225,7 @@ void MainScene::handleStates(float dt)
 			DelayTime::create(1.0f),
 			CallFunc::create([&]()
 		{
-			State::get()->setState(StatesInfo::Finish);
+			State::getInstance()->setState(StatesInfo::Finish);
 			updateText(getAnswer(chosenindx), "Tap to ask another question");
 		}),
 			nullptr));
@@ -235,7 +234,7 @@ void MainScene::handleStates(float dt)
 	{
 		if (screenInteract)
 		{
-			State::get()->setState(StatesInfo::Start);
+			State::getInstance()->setState(StatesInfo::Start);
 		}
 	}break;
 	default:
@@ -245,7 +244,7 @@ void MainScene::handleStates(float dt)
 
 void MainScene::handleApp(float dt)
 {
-	auto _state = State::get()->getState();
+	auto _state = State::getInstance()->getState();
 
 	if (_state == StatesInfo::Tilt)
 	{
@@ -260,7 +259,6 @@ void MainScene::handleApp(float dt)
 	}
 
 	accPrev = Vec2();
-	handStartAcc = Vec2();
 
 	int nearIndex = 0;
 	ball->setAnchorPoint(Vec2(0.5, 0.5));
@@ -282,7 +280,6 @@ void MainScene::handleApp(float dt)
 	ball->runAction(MoveTo::create(0.5f, midPositions.at(nearIndex)));
 
 	circleBody->setVelocity(Vec2());
-	//circleBody->resetForces();
 }
 
 void MainScene::updateText(std::string mainLabel, std::string helperLabel) 

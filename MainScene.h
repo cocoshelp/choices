@@ -12,19 +12,19 @@ public:
 private:
 	
 	// Nodes
-	cocos2d::Sprite *ball;
-	cocos2d::Label *interactText;
-	cocos2d::Label *helperText;
-	cocos2d::Label *forTest;
-	cocos2d::Layer *startButton;
-	cocos2d::PhysicsBody *circleBody;
+	cocos2d::Sprite* ball;
+	cocos2d::Label* interactText;
+	cocos2d::Label* helperText;
+	cocos2d::Label* forTest;
+	cocos2d::Layer* interactionLayer;
+	cocos2d::PhysicsBody* circleBody;
 	cocos2d::Vec2 acc;
 	cocos2d::Vec2 accPrev;
 	cocos2d::Vec2 handStartAcc;
 
 	// Cocos methods
-	void OnAcceleration(cocos2d::Acceleration *acc, cocos2d::Event *_event);
-	void interactScreen(cocos2d::Touch *touch, cocos2d::Event *event);
+	void OnAcceleration(cocos2d::Acceleration* acc, cocos2d::Event* _event);
+	void interactScreen(cocos2d::Touch* touch, cocos2d::Event* event);
 	void handleApp(float dt);
 	void handleStates(float dt);
 

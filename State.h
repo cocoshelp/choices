@@ -4,7 +4,7 @@
 class State
 {
 public:
-	static State* get()
+	static State* getInstance()
 	{
 		static State instance;
 		return &instance;
