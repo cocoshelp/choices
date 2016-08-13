@@ -29,20 +29,12 @@ private:
 #define GETSCALEY ( ScaleManager::getInstance()->getScaleY() )
 #define GETSCALEFAC ( ScaleManager::getInstance()->getScaleFactor() )
 
-#define SCALEX(p) ( (p) * GETSCALEX )
-#define SCALEY(p) ( (p) * GETSCALEY )
-#define SCALE(p) ( (p) * GETSCALEFAC )
-
-#define SCALEDPOS(x,y) ( Vec2 (  GETSCALEX * (x), GETSCALEY * (y)) )
-
-#define SCALEFONT(p) ( (p) * SCALEY * GETSCALEFAC )
-
 #define SCALENODE(n) \
 	n->setScaleX(GETSCALEX); \
 	n->setScaleY(GETSCALEY)
 
 #define SCALEBYRADIUS(n) \
-	n->setScaleX(GETSCALEX); \
-	n->setScaleY(GETSCALEX)
+	n->setScaleX(GETSCALEFAC); \
+	n->setScaleY(GETSCALEFAC)
 
 
